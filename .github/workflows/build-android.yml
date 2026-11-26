@@ -1,0 +1,39 @@
+
+name: Build Nothing Control APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
+
+      - name: Install Buildozer
+        run: |
+          python3 -m pip install --user buildozer cython==0.29.34
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Extract source
+        run: |
+          unzip -o Nothing_Control_v1.0_source.zip -d .
+          ls -la
+
+      - name: Build APK
+        working-directory: Daiz_Control_v1/android
+        run: |
+          yes | buildozer -v android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nothing-Control-v1.0-APK
+          path: Daiz_Control_v1/android/bin/*.apk
